@@ -1,0 +1,38 @@
+project: MHIST # UPDATE AT RUN
+mode: five_shot # UPDATE AT RUN
+data:
+  datafile_path: ./Datafiles/MHIST/mhist_samples.csv # UPDATE AT RUN
+  save_path: ./Results/${project}/random/${mode}/ # UPDATE AT RUN
+  dataset_vectors_path: ./VisionModels/fewshot-histo/features/phikon_MHIST_features.npy # UPDATE AT RUN
+  #unique_identifier: "TCGA-..-...." # Set this to identify unique patients -> in case a patient has multiple images and we want to prevent leakage of other images from the same patient into our few shot samples
+  #use_tiles: sub # UPDATE AT RUN: choose from sub, t1, t2 # only useful for the Duke Mamma MRI set
+  use_only: ["HP", "SSA"] # UPDATE AT RUN
+  batch_size: 0 # UPDATE AT RUN
+  num_shots: 5
+  show_bbox: False # UPDATE AT RUN
+  label_replacements:
+    "HP": "The following image contains a Hyperplastic colon Polyp (HP): "
+    "SSA": "The following image contains a Sessile Serrated Adenoma (SSA): "
+  most_similar_last: True
+  take_random: True
+
+model:
+  model_name: gpt-4-vision-preview
+  img_quality: high # TODO: set to high when running
+  model_kwargs:
+    frequency_penalty: 0
+    logit_bias: null
+    # max_tokens: 4096
+    response_format: {type: json_object}
+    n: 1
+    seed: 42
+    stream: False
+    temperature: 1
+    top_p: 1
+
+user_args:
+  system_prompt_path: ./Prompts/MHIST/gpt4_system_prompt_complete_instruct.txt # UPDATE AT RUN
+  user_query_path: ./Prompts/MHIST/gpt4_user_prompt_few_shot_complete_instruct.txt # UPDATE AT RUN
+  verbose: True
+  debug: False ################################## Set to True for Debugging: runs only 1 sample and savely exits after saving
+  batched: False

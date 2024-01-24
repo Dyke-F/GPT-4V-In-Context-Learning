@@ -1,0 +1,42 @@
+project: CRC100K # UPDATE AT RUN
+mode: three_shot # UPDATE AT RUN
+data:
+  datafile_path: ./Datafiles/CRC100K/test_samples_binary.csv # UPDATE AT RUN
+  save_path: ./Results/${project}/${mode}/results_${mode}_run_high_interleaved # UPDATE AT RUN
+  # use_tiles: sub # UPDATE AT RUN: choose from sub, t1, t2
+  use_only: [NORM, TUM] # UPDATE AT RUN
+  batch_size: 0 # UPDATE AT RUN
+  num_shots: 3
+  show_bbox: False # UPDATE AT RUN
+  label_replacements:
+    "NORM": "The following image contains normal, healthy colon mucosa: "
+    "TUM": "The following image contains colorectal adenocarcinoma / cancer: "
+    "ADI": "The following image contains adipose tissue / fat: "
+    "BACK": "The following image contains background: "  # TODO: NEVER USE: https://www.medrxiv.org/content/10.1101/2023.07.21.23292757v2.full.pdf
+    "DEB": "The following image contains debris: "
+    "LYM": "The following image contains lymphocytes: "
+    "MUC": "The following image contains mucus: "
+    "MUS": "The following image contains smooth muscle tissue: "
+    "STR": "The following image contains cancer-associated stroma: "
+  # samples: 
+
+model:
+  model_name: gpt-4-vision-preview
+  img_quality: high # TODO: set to high when running
+  model_kwargs:
+    frequency_penalty: 0
+    logit_bias: null
+    # max_tokens: 4096
+    response_format: {type: json_object}
+    n: 1
+    seed: 42
+    stream: False
+    temperature: 1
+    top_p: 1
+
+user_args:
+  system_prompt_path: ./Prompts/${project}/binary/gpt4_system_prompt.txt # UPDATE AT RUN
+  user_query_path: ./Prompts/${project}/binary/gpt4_user_prompt_few_shot.txt # UPDATE AT RUN
+  verbose: True
+  debug: False ################################## Set to True for Debugging: runs only 1 sample and savely exits after saving
+  batched: False 

@@ -1,0 +1,38 @@
+project: PCam # UPDATE AT RUN
+mode: three_shot # UPDATE AT RUN
+data:
+  datafile_path: ./Datafiles/${project}/pcam_test_samples.csv # UPDATE AT RUN
+  save_path: ./Results/${project}/random/${mode}/ # UPDATE AT RUN
+  dataset_vectors_path: ./VisionModels/fewshot-histo/features/phikon_PCAM_features.npy # UPDATE AT RUN
+  # use_tiles: sub # UPDATE AT RUN: choose from sub, t1, t2
+  use_only: ["NORM", "TUM"] # UPDATE AT RUN
+  batch_size: 0 # UPDATE AT RUN
+  num_shots: 3
+  show_bbox: False # UPDATE AT RUN
+  label_replacements:
+    "NORM": "The following image contains normal lymph node tissue: "
+    "TUM": "The following image contains metastatic breast cancer: "
+  samples: ['NORM-PCAM-11396', 'NORM-PCAM-9786', 'NORM-PCAM-2077', 'NORM-PCAM-412', 'NORM-PCAM-32504', 'NORM-PCAM-1862', 'NORM-PCAM-28981', 'NORM-PCAM-11760', 'NORM-PCAM-316', 'NORM-PCAM-26360','NORM-PCAM-30971', 'NORM-PCAM-2439', 'NORM-PCAM-616']
+  most_similar_last: True
+  take_random: True
+
+model:
+  model_name: gpt-4-vision-preview
+  img_quality: high # TODO: set to high when running
+  model_kwargs:
+    frequency_penalty: 0
+    logit_bias: null
+    # max_tokens: 4096
+    response_format: {type: json_object}
+    n: 1
+    seed: 42
+    stream: False
+    temperature: 1
+    top_p: 1
+
+user_args:
+  system_prompt_path: ./Prompts/PCam/KNN/gpt4_system_prompt.txt # UPDATE AT RUN
+  user_query_path: ./Prompts/PCam/KNN/gpt4_user_prompt_few_shot.txt # UPDATE AT RUN
+  verbose: True
+  debug: False ################################## Set to True for Debugging: runs only 1 sample and savely exits after saving
+  batched: False 
