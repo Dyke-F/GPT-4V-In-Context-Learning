@@ -49,7 +49,7 @@ et-xmlfile==1.1.0
 evaluate==0.4.0
 executing==1.2.0
 faiss-cpu==1.7.4
-fastapi==0.104.1
+fastapi==0.109.1
 fastjsonschema==2.18.1
 filelock==3.12.3
 Flask==3.0.0
