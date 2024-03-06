@@ -1,6 +1,8 @@
 # Medical Image In-Context Learning (ICL) with GPT-4V 
 Attention: This repository is currently under construction. Usage might change in the future. 
 
+![Local Image](./project_layout.png)
+
 ## Software Requirements
 All experiments were run on an Apple MacBook Pro M2 Max 96GB 2023.
 No special hardware is required, if training vision models is desired a CUDA-compatible GPU may speed up the process.
