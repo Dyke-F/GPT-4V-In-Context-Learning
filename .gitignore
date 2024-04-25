@@ -1,0 +1,7 @@
+data/
+env/
+features/
+TrainedModels/
+images/
+Results/
+run_batch.sh
