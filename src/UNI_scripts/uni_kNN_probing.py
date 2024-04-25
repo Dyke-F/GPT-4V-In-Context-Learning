@@ -270,7 +270,7 @@ def load_features(task, config):
     return Features(all_features=all_features, labels=np_features["name"])
 
 
-def linear_probing(query_feature, features, task):
+def knn_probing(query_feature, features, task):
 
     all_features = features.all_features
     labels = features.labels
@@ -347,7 +347,7 @@ def inference_uni_lin_probing(task: str, config: dataclass, uni_out_dim: int = 1
 
             uni_outputs = uni(images)
 
-            predicted_labels = linear_probing(query_feature=uni_outputs,
+            predicted_labels = knn_probing(query_feature=uni_outputs,
                 features=features,
                 task=task
             )
@@ -359,7 +359,7 @@ def inference_uni_lin_probing(task: str, config: dataclass, uni_out_dim: int = 1
             results.extend(zip(filenames, true_labels, predicted_labels))
 
     results_df = pd.DataFrame(results, columns=['file_name', "true_label", "predicted_label"])
-    results_df.to_csv(f"UNI_LINEAR_PROBING_{task}_eval.csv", index=False)
+    results_df.to_csv(f"UNI_KNN_PROBING_{task}_eval.csv", index=False)
 
 
 

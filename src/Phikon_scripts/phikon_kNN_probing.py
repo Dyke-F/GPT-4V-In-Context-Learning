@@ -282,7 +282,7 @@ def load_features(task, config):
     return Features(all_features=all_features, labels=np_features["name"])
 
 
-def linear_probing(query_feature, features, task):
+def knn_probing(query_feature, features, task):
 
     all_features = features.all_features
     labels = features.labels
@@ -356,7 +356,7 @@ def inference_phikon_lin_probing(task: str, config: dataclass, phikon_out_dim: i
             outputs = phikon_outputs.last_hidden_state[:, 0, :]
 
 
-            predicted_labels = linear_probing(query_feature=outputs,
+            predicted_labels = knn_probing(query_feature=outputs,
                 features=features,
                 task=task
             )
@@ -368,7 +368,7 @@ def inference_phikon_lin_probing(task: str, config: dataclass, phikon_out_dim: i
             results.extend(zip(filenames, true_labels, predicted_labels))
     
     results_df = pd.DataFrame(results, columns=["file_name", "true_label", "predicted_label"])
-    results_df.to_csv(f"PHIKON_LINEAR_PROBING_{task}_eval.csv", index=False)
+    results_df.to_csv(f"PHIKON_KNN_PROBING_{task}_eval.csv", index=False)
 
 
 if __name__ == "__main__":
