@@ -1,6 +1,6 @@
 # Medical Image In-Context Learning (ICL) with GPT-4V 
 
-# For training image classifiers like UNI and CTpath as well as Resnet / ViTs, please switch to the train_classifiers branch.
+## For training image classifiers like UNI and CTpath as well as Resnet / ViTs, please switch to the train_classifiers branch.
 
 Attention: This repository is currently under construction. Usage might change in the future. 
 
