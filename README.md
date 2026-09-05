@@ -1,6 +1,6 @@
 <a name="in-context-learning-for-cancer-pathology"></a>
 
-<h1 align="center">🔬 In-context learning for cancer pathology</h1>
+<h1 align="center">In-context learning for cancer pathology</h1>
 
 <p align="center">
   <strong>Learning from image examples, without updating model weights</strong><br/>
