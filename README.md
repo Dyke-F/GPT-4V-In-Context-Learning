@@ -5,7 +5,7 @@
 Research code accompanying **Ferber et al., Nature Communications 15, 10104 (2024)**:
 [**In-context learning enables multimodal large language models to classify cancer pathology images**](https://doi.org/10.1038/s41467-024-51465-9).
 
-[Paper](https://www.nature.com/articles/s41467-024-51465-9) · [Published results](#published-results) · [Getting started](#getting-started) · [Classifier training](#vision-classifier-training) · [Citation](#citation)
+[📄 Paper](https://www.nature.com/articles/s41467-024-51465-9) · [Published results](#published-results) · [Getting started](#getting-started) · [Classifier training](#vision-classifier-training) · [Citation](#citation)
 
 This project evaluates how image examples supplied in context change GPT-4V's histopathology classification performance. It compares zero-shot prompting, random few-shot selection, and nearest-neighbour selection in pathology-embedding space, alongside trained image classifiers and pathology foundation-model probes.
 
@@ -13,7 +13,9 @@ This project evaluates how image examples supplied in context change GPT-4V's hi
 
 *Project schematic from the existing repository. See the [publication](https://www.nature.com/articles/s41467-024-51465-9) for the study figures, methods, and accompanying credits.*
 
-## Published results
+<a name="published-results"></a>
+
+## 📊 Published results
 
 The study benchmarks three binary pathology tasks. The table summarizes reported zero-shot and ten-shot classification accuracies.
 
@@ -27,7 +29,9 @@ Under matched ten-shot conditions, GPT-4V exceeded the best ImageNet-initialized
 
 See [Figures 2–3 and the supplementary tables](https://www.nature.com/articles/s41467-024-51465-9#Fig3) for confidence intervals, sampling strategies, and baseline-training conditions. The small multiclass illustration later in this README is separate from these published binary-task benchmarks.
 
-## Code map
+<a name="code-map"></a>
+
+## 🗂️ Code map
 
 | Area | Entry points |
 | --- | --- |
@@ -39,7 +43,9 @@ See [Figures 2–3 and the supplementary tables](https://www.nature.com/articles
 | Metrics and visualizations | [evaluate.py](evaluate.py), [evaluate_for_publication.py](evaluate_for_publication.py) |
 | Vision and pathology-model training | [train_classifiers branch](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers) |
 
-## Getting started
+<a name="getting-started"></a>
+
+## ⚙️ Getting started
 
 ### Environment
 
@@ -87,7 +93,9 @@ The main configuration fields are:
 | `user_args.system_prompt_path` / `user_query_path` | Prompt templates |
 | `user_args.debug` | Short debug run before a larger experiment |
 
-## Running and evaluating experiments
+<a name="running-and-evaluating-experiments"></a>
+
+## 🔬 Running and evaluating experiments
 
 [main.py](main.py) uses Hydra configuration. Its default selects the CRC100K zero-shot example. After configuring local data and model access, run from the repository root:
 
@@ -105,7 +113,9 @@ Nearest-neighbour experiments use both target images and the reference-example p
 
 For evaluation, configure `subdir`, the task, and the binary/multiclass setting in [evaluate.py](evaluate.py) or [evaluate_for_publication.py](evaluate_for_publication.py), then execute the selected script. For example, the existing evaluation function supports `main(subdir, task=Task.PCAM, multiclass=False)` for PatchCamelyon. Outputs include summary metrics, confidence intervals, and confusion matrices.
 
-## Vision classifier training
+<a name="vision-classifier-training"></a>
+
+## 🔬 Vision classifier training
 
 The [train_classifiers branch](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers) contains dedicated training and inference scripts:
 
@@ -117,7 +127,9 @@ On the main branch, [prepare_for_VisionModels.ipynb](prepare_for_VisionModels.ip
 
 These are classifier-training and feature-probing experiments, distinct from pretraining the underlying pathology foundation models.
 
-## Repository illustration: multiclass tissue classification
+<a name="repository-illustration-multiclass-tissue-classification"></a>
+
+## 🖼️ Repository illustration: multiclass tissue classification
 
 The existing illustration uses **32 images, four per tissue class**, with the [zero-shot](config/CRC100K/knn/zero_shot.yaml) and [three-shot](config/CRC100K/knn/three_shot.yaml) configurations. Few-shot execution also uses the full reference-example pool configured for sampling.
 
@@ -133,13 +145,17 @@ The recorded example accuracies are **43.75% for zero-shot** and **71.875% for t
 
 For this illustration, complete all 32 target images before generating the multiclass summary so that all labels are represented. The original repository also records a 15-images-per-class example with accuracies of 32.5% and 72.5% for zero-shot and three-shot sampling, respectively.
 
-## Data use and attribution
+<a name="data-use-and-attribution"></a>
+
+## 🔒 Data use and attribution
 
 Obtain CRC100K, MHIST, and PatchCamelyon through the sources listed in the [paper's data-availability statement](https://www.nature.com/articles/s41467-024-51465-9). Dataset terms, model-weight licenses, and service permissions apply independently. Keep sensitive or access-controlled material, credentials, and private outputs out of public repositories.
 
 The [article](https://www.nature.com/articles/s41467-024-51465-9#rightslink) is published under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/), subject to its third-party credit lines. This README provides a newly written study summary and retains the existing repository graphics without modification. The article license does not change the licensing of repository code, third-party implementations, model weights, or datasets.
 
-## Citation
+<a name="citation"></a>
+
+## 📚 Citation
 
 ```bibtex
 @article{ferber2024pathologyicl,
