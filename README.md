@@ -32,7 +32,7 @@ This project evaluates how image examples supplied in context change GPT-4V's hi
 
 ## 📊 Published results
 
-The study benchmarks three binary pathology tasks. The table summarizes reported zero-shot and ten-shot classification accuracies.
+The study benchmarks three binary pathology tasks. The table summarizes reported zero-shot and ten-shot classification accuracies. Ten-shot means ten examples per class: randomly selected for the CRC100K task and selected by nearest-neighbour sampling for MHIST and PatchCamelyon.
 
 | Dataset / task | Zero-shot GPT-4V | Ten-shot GPT-4V |
 | --- | --- | --- |
@@ -41,6 +41,8 @@ The study benchmarks three binary pathology tasks. The table summarizes reported
 | PatchCamelyon: lymph-node metastasis detection | **60.0%** | **88.3%** |
 
 Under matched ten-shot conditions, GPT-4V exceeded the best ImageNet-initialized classifier comparator, Tiny-ViT, by **3.3 percentage points on MHIST** and **6.6 percentage points on PatchCamelyon**. The study also evaluates Phikon and UNI features using linear probes and nearest-neighbour classification; those comparisons are distinct from the matched ImageNet-baseline experiment.
+
+The MHIST value above follows the matched-model comparison text accompanying Figure 3; Table 2 lists 83.4%.
 
 See [Figures 2–3 and the supplementary tables](https://www.nature.com/articles/s41467-024-51465-9#Fig3) for confidence intervals, sampling strategies, and baseline-training conditions. The small multiclass illustration later in this README is separate from these published binary-task benchmarks.
 
