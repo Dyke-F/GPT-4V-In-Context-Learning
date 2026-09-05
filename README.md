@@ -1,196 +1,158 @@
-# Medical Image In-Context Learning (ICL) with GPT-4V 
+# In-context learning for cancer pathology
 
-## For training image classifiers like UNI and CTpath as well as Resnet / ViTs, please switch to the train_classifiers branch.
+**Multimodal language-model evaluation, image-example selection, and matched vision-model baselines.**
 
-Attention: This repository is currently under construction. Usage might change in the future. 
+Research code accompanying **Ferber et al., Nature Communications 15, 10104 (2024)**:
+[**In-context learning enables multimodal large language models to classify cancer pathology images**](https://doi.org/10.1038/s41467-024-51465-9).
 
-![Local Image](./project_layout.png)
+[Paper](https://www.nature.com/articles/s41467-024-51465-9) · [Published results](#published-results) · [Getting started](#getting-started) · [Classifier training](#vision-classifier-training) · [Citation](#citation)
 
-## Software Requirements
-All experiments were run on an Apple MacBook Pro M2 Max 96GB 2023.
-No special hardware is required, if training vision models is desired a CUDA-compatible GPU may speed up the process.
+This project evaluates how image examples supplied in context change GPT-4V's histopathology classification performance. It compares zero-shot prompting, random few-shot selection, and nearest-neighbour selection in pathology-embedding space, alongside trained image classifiers and pathology foundation-model probes.
 
-## General Setup Instructions
+![Overview of the in-context learning and vision-model evaluation workflow](project_layout.png)
 
-Please follow the steps below:
+*Project schematic from the existing repository. See the [publication](https://www.nature.com/articles/s41467-024-51465-9) for the study figures, methods, and accompanying credits.*
 
-1. **Python Installation**: Install Python from source. We used Python 3.11.6 throughout this project. 
-2. **Dependency Installation**: 
+## Published results
 
-Clone this repository:
-  ```
-  git clone https://github.com/Dyke-F/GPT-4V-In-Context-Learning.git
-  ```
+The study benchmarks three binary pathology tasks. The table summarizes reported zero-shot and ten-shot classification accuracies.
 
-This process might take around 1 minute.
+| Dataset / task | Zero-shot GPT-4V | Ten-shot GPT-4V |
+| --- | --- | --- |
+| CRC100K: tumor versus normal mucosa | **61.7%** | **90.0%** |
+| MHIST: colorectal-polyp classification | **56.7%** | **83.3%** |
+| PatchCamelyon: lymph-node metastasis detection | **60.0%** | **88.3%** |
 
-Set up a clean python3 virtual environment, i.e. 
+Under matched ten-shot conditions, GPT-4V exceeded the best ImageNet-initialized classifier comparator, Tiny-ViT, by **3.3 percentage points on MHIST** and **6.6 percentage points on PatchCamelyon**. The study also evaluates Phikon and UNI features using linear probes and nearest-neighbour classification; those comparisons are distinct from the matched ImageNet-baseline experiment.
 
-  ```
-  python3 -m venv venv
-  source venv/bin/activate
-  ```
+See [Figures 2–3 and the supplementary tables](https://www.nature.com/articles/s41467-024-51465-9#Fig3) for confidence intervals, sampling strategies, and baseline-training conditions. The small multiclass illustration later in this README is separate from these published binary-task benchmarks.
 
-Install necessary dependencies. :
-   ```bash
-   cd GPT-4V-In-Context-Learning
-   pip install -r requirements.txt
-   ```
+## Code map
 
-3. **Repository Structure**:
-```
-.
-├── Datafiles                            # contains subdirecotories for each dataset with .csv files containing paths to the test samples
-│   ├── CRC100K
-│   ├── MHIST
-│   └── PCam
-├── Prompts                              # contains subdirecotories for each dataset and user and system prompt as .txt file
-│   ├── CRC100K
-│   ├── MHIST
-│   └── PCam
-├── README.md
-├── Results                              # Results from running main.py will be stored here as .json file, i.e. Results/PCam/KNN/five_shot/...json
-│   ├── CRC100K
-│   ├── MHIST
-│   └── PCam
-├── Stats                                # similar nested structure like Results, contains a .csv file of the model outputs, a statistics table and plots 
-│   ├── CRC100K
-│   ├── MHIST
-│   └── PCam
-├── VisionModels                         # ResNets and Transformers
-│   ├── CRC100K
-│   ├── MHIST
-│   ├── PCam
-│   ├── create_embeddings.ipynb          # Generate the image embeddings (feature vectors) used for kNN similarity sampling
-│   ├── fewshot-histo                    # Nested Directory, containing source code for Owkin's Phikon Model, used to generate feature vectors (embeddings)
-│   ├── make_pcam_imgs.ipynb             # Convert PCam h5-files back to .png images to feed into GPT-4V 
-│   ├── run_finetune.ipynb               # alternative fine-tuning of Phikon 
-│   ├── run_nearest_neighbours.ipynb     # alternative nearest-neighours search with Phikon
-│   ├── train_classifier.ipynb           # train Res-Net and Vision-Transformer for comparison with GPT-4V
-│   └── venv
-├── Visualisations                       # Nested directory to create visualisations for Manuscript figures, Mean Accuracy and CIs
-│   ├── CRC100K_eval
-│   ├── MHIST_eval
-│   ├── PCam_eval
-│   ├── venv
-│   └── visualisations
-├── config                               # Nested directory with .yaml file configuration templates
-│   ├── CRC100K
-│   ├── MHIST
-│   └── PCam
-├── data                                 # Directory to store the source data
-│   ├── CRC-VAL-HE-7K-png
-│   ├── MHIST
-│   └── PCam
-├── dataset.py                           # Dataset class, implements zero- and multi shot 
-├── evaluate.py                          # Calculates statistics and heatmaps, outputs are stored in Stats/
-├── evaluate_for_publication.py          # Minor code changes to evaluate.py like color schemes and layouts
-├── knn_dataset.py                       # Similar to dataset.py, implements kNN-sampling (get_topk_similar_per_label)
-├── main.py                              # Runs the GPT-4V evaluation, requires setting a configuration .yaml file
-├── make_datasets.ipynb                  # Helper functions to create test dataset for CRC100K, PCam and MHIST
-├── prepare_for_VisionModels.ipynb       # Converts GPT-4V sampled data into a training file for VisionModels/
-├── requirements.txt
-├── text_embeddings.ipynb                # Create and visualize text embeddings for Figure 5
-├── utils.py                             # Utility functions
-├── venv
-└── vision.py                            # Main class
+| Area | Entry points |
+| --- | --- |
+| GPT-4V experiment runner | [main.py](main.py), [vision.py](vision.py) |
+| Dataset handling and example selection | [dataset.py](dataset.py), [knn_dataset.py](knn_dataset.py) |
+| Dataset preparation | [make_datasets.ipynb](make_datasets.ipynb) |
+| Image-feature extraction | [VisionModels/create_embeddings.ipynb](VisionModels/create_embeddings.ipynb) |
+| Prompt and experiment configurations | [Prompts/](Prompts/), [config/](config/) |
+| Metrics and visualizations | [evaluate.py](evaluate.py), [evaluate_for_publication.py](evaluate_for_publication.py) |
+| Vision and pathology-model training | [train_classifiers branch](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers) |
+
+## Getting started
+
+### Environment
+
+The original experiments used Python 3.11.6. Create an isolated environment:
+
+```bash
+git clone https://github.com/Dyke-F/GPT-4V-In-Context-Learning.git
+cd GPT-4V-In-Context-Learning
+python3.11 -m venv venv
+source venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-## GPT-4 In-Context Learning
+Configure your OpenAI API credential in a local `.env` file:
 
-Using GPT-4V requires access to OpenAIs API. If you do not have one, create an account and generate an API key. Check for further information here: https://openai.com/blog/openai-api
-
-After generating an API key copy it and place it in a **.env** file in the main directory of this repository.
-The .env file should look like this:
-
-```
-OPENAI_API_KEY="sk-******************" # Place your API key here
+```dotenv
+OPENAI_API_KEY=your_openai_api_key
 ```
 
+Keep the credential out of version control. Configurations record the original `gpt-4-vision-preview` model identifier; check your model access and record the model used for any new experiments. Changing the backend is a new experimental condition, not a rerun of the published model.
 
+The original evaluation environment included an Apple MacBook Pro with an M2 Max and 96 GB RAM. GPU acceleration is useful for local feature extraction and classifier training; device settings should match your environment.
 
-1. Download an image dataset and place it in the **data** directory. The dataset folder should only contain .png images.
-2. Use **make_datasets.ipynb** to create a dataset .csv file. For custom datasets not used in our study, the provided functions will need to be modified.
-3. If you use a custom dataset, change the input prompt to give the model context about your data and the expected outcomes. In the **Prompts** folder we provide all templates used in our study.
-4. If using (knn) sampling, create image feature-vectors beforehand. 
-    This can be done with **Vision/Models/create_embeddings.ipynb**. Open the notebook and follow these steps:
-    - a. Select a feature extractor.
-    - b. Set the directory as a key in IMAGE_DIRS.
-    - c. If not running on MacOS, maybe change the device to CUDA if available.
-    - d. run create_img_embeddings with the string name of your dataset key in IMAGE_DIRS.
-    - e. After this is done a .npy file containing feature vectors should be created.
-5. Set your **config** file. We provide all configuration files used in our study as templates.
-Available options are:
+### Data and prompts
 
-```
-project:                                # Set a project name (i.e. for creating Results folder), ideally dataset name
-mode:                                   # i.e. five_shot or random 
-data:
-  datafile_path:                        # path to your dataset .csv file containg the paths to the .png images in a table
-  save_path:                            # where to store the results
-  dataset_vectors_path:                 # in few-shot sampling: path to .npy Phikon feature embeddings to
-  # use_tiles:                          # deprecated, ignore
-  use_only:                             # provide a list of labels that should be used, i.e. for debugging or testing
-  batch_size:                           # set to 0, increase if OpenAI enables batched inputs in future API releases
-  num_shots:                            # number of few-shot examples
-  show_bbox:                            # deprecated, ignore
-  label_replacements:                   # replace the label encodings in the prompt, i.e replace "..." with "Image of tumor tissue"
-    "TUM": "..."
-  # samples: []                         # uncomment to run only on certain samples, i.e. for debugging or testing
-  most_similar_last: False              # if True, sorts the kNN-sampled example images in ascending similarity to the target image in the prompt
+1. Obtain the desired dataset under its applicable access and usage terms and prepare local PNG image paths.
+2. Use [make_datasets.ipynb](make_datasets.ipynb) to prepare the CSV files consumed by the dataset classes.
+3. Choose the corresponding system and user prompts from [Prompts/](Prompts/).
+4. For nearest-neighbour sampling, use [VisionModels/create_embeddings.ipynb](VisionModels/create_embeddings.ipynb) to generate image features. Set the feature extractor, dataset directory, and compute device before running it.
+5. Select a configuration from [config/](config/) and update its dataset, prompt, embedding, and output paths for your local environment.
 
-model:
-  model_name: gpt-4-vision-preview      # only model currently supported
-  img_quality: high                     # check for https://platform.openai.com/docs/guides/vision vor further information, can be high or low
-  model_kwargs:                         # model hyperparemeters, ... omits for brevity
-    ...
+The main configuration fields are:
 
-user_args:
-  system_prompt_path:                   # path to the system prompt 
-  user_query_path:                      # path to the user prompt
-  verbose:                              # print statistics while running main.py
-  debug:                                # if True breaks the script after the first sample, prevents high costs in case outcome is erroneus/unexpected
-  batched:                              # not yet supported, see batch_size for details
+| Field | Purpose |
+| --- | --- |
+| `data.datafile_path` | CSV containing the target image paths and labels |
+| `data.save_path` | Local output directory |
+| `data.dataset_vectors_path` | Image embeddings used for nearest-neighbour selection |
+| `data.num_shots` | Number of in-context examples per class |
+| `data.use_only` | Optional label subset |
+| `data.label_replacements` | Human-readable label descriptions |
+| `data.most_similar_last` | Ordering of selected examples |
+| `model.model_name` | Model identifier for the run |
+| `model.img_quality` | Image-detail setting |
+| `user_args.system_prompt_path` / `user_query_path` | Prompt templates |
+| `user_args.debug` | Short debug run before a larger experiment |
+
+## Running and evaluating experiments
+
+[main.py](main.py) uses Hydra configuration. Its default selects the CRC100K zero-shot example. After configuring local data and model access, run from the repository root:
+
+```bash
+python main.py --config-path ./config/CRC100K/knn --config-name zero_shot
 ```
 
-6. Edit **main.py**. Set @hydra.main(config_path="./config/PCam/knn", config_name="ten_shot", version_base="1.3") to the configuration file you want to use.
-7. Run the **main.py** file as a script from the command line.
-8. Evaluate the results. For this modify the evaluate.py (or evaluate_for_publication.py) file.
+To select another experiment, choose its configuration directory and name, for example:
 
-At the end of the file set the following:
-**subdir = ...** Path to the subdirectory of your results inside the Results/ folder, i.e. subdir = "PCam/knn/ten_shot"
-In the call to main set the task. This is relevant to create labels for plots etc. If using a custom dataset, you might want to extend the Task class and modify the label encodings. If it is a binary task set multiclass = False.
-i. e. **main(subdir, task=Task.PCAM, multiclass=False)**
+```bash
+python main.py --config-path ./config/MHIST/knn --config-name ten_shot
+```
 
+Nearest-neighbour experiments use both target images and the reference-example pool, together with the corresponding feature vectors. Configure all three consistently. Start with a small debug run to inspect prompts and outputs before expanding an API-backed experiment.
 
-## Vision Classifier Training
+For evaluation, configure `subdir`, the task, and the binary/multiclass setting in [evaluate.py](evaluate.py) or [evaluate_for_publication.py](evaluate_for_publication.py), then execute the selected script. For example, the existing evaluation function supports `main(subdir, task=Task.PCAM, multiclass=False)` for PatchCamelyon. Outputs include summary metrics, confidence intervals, and confusion matrices.
 
-1. To train a image classifier (ResNet or Vision Transformer) first convert your GPT-4 output files into a training dataset. Modify the **prepare_for_VisionModels.ipynb** to do so. You need a base path to your Results/ folder and a destination folder. The **make_train_datafile** function works for the provided datasets but might require modification if other datasets are used.
-2. Modify the **VisionModels/train_classifier.ipynb** file. Set your directories as indicated. Run the **run_train_test** function.  
+## Vision classifier training
 
+The [train_classifiers branch](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers) contains dedicated training and inference scripts:
 
-## Example Dataset
-1. In order to try out the code, we provide 32 images from the NCT-CRC100K dataset and 2 ready to use config files: 
+- [VisionClassifier_scripts](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers/src/VisionClassifier_scripts): standard vision-classifier training and inference.
+- [Phikon_scripts](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers/src/Phikon_scripts): Phikon linear probes and nearest-neighbour evaluation.
+- [UNI_scripts](https://github.com/Dyke-F/GPT-4V-In-Context-Learning/tree/train_classifiers/src/UNI_scripts): UNI linear probes and nearest-neighbour evaluation.
 
-    - **/config/CRC100K/knn/zero_shot.yaml**
-    - **/config/CRC100K/knn/three_shot.yaml**
+On the main branch, [prepare_for_VisionModels.ipynb](prepare_for_VisionModels.ipynb) prepares sampled examples for classifier comparisons, and [VisionModels/train_classifier.ipynb](VisionModels/train_classifier.ipynb) provides the notebook-based training workflow. Configure the input/output directories and select the appropriate training procedure for the comparison being reproduced.
 
-2. To run this simply call: ```python3 main.py```from the command line. # Modify the main function with the respective config file. 
-3. Once the run is completed, call ```python3 evaluate.py```. This will only work if the run was completed on all 32 images, as the statistics and visualisation implementations require all labels to be present. # Modify the main function with the respective Results folder name. 
+These are classifier-training and feature-probing experiments, distinct from pretraining the underlying pathology foundation models.
 
-CAVE: The few-shot samples file **/config/CRC100K/knn/three_shot.yaml** will only run if the full CRC100K dataset is placed in the respective image folder and will fail if not, as the sampling requires all images.
+## Repository illustration: multiclass tissue classification
 
-### Results
+The existing illustration uses **32 images, four per tissue class**, with the [zero-shot](config/CRC100K/knn/zero_shot.yaml) and [three-shot](config/CRC100K/knn/three_shot.yaml) configurations. Few-shot execution also uses the full reference-example pool configured for sampling.
 
-Results for 0-shot prompting on 4 images per label 
-![Local Image](./knn_result_zero_shot_run1_confusion_matrix_paper_purple_line.png)
+The recorded example accuracies are **43.75% for zero-shot** and **71.875% for three-shot nearest-neighbour prompting**. This small example illustrates the workflow and is not a substitute for the paper's evaluation.
 
-Results for 3-shot prompting on 4 images per label 
-![Local Image](./knn_result_three_shot_run1_confusion_matrix_paper_purple_line.png)
+### Zero-shot example
 
-The overall performance increases from an accuracy of  **0.4375** for zero-shot to **0.71875** for three-shot kNN-prompting. 
+![Zero-shot confusion matrix for the repository's 32-image multiclass illustration](knn_result_zero_shot_run1_confusion_matrix_paper_purple_line.png)
 
-We see, that using only 3 images as examples for in-context learning are enough to improve prediction on the classes Debris (DEB), Lymphocytes (LYM), Mucus (MUC) and Stroma (STR).
+### Three-shot example
 
-Evaluating on only 4 samples per label might however not be representative and is for illustration purposes only.
-For *n=15* per label, we achieved an accuracy of **0.325** and **0.725** for 0-shot and three-shot sampling respectively.
+![Three-shot nearest-neighbour confusion matrix for the repository's 32-image multiclass illustration](knn_result_three_shot_run1_confusion_matrix_paper_purple_line.png)
+
+For this illustration, complete all 32 target images before generating the multiclass summary so that all labels are represented. The original repository also records a 15-images-per-class example with accuracies of 32.5% and 72.5% for zero-shot and three-shot sampling, respectively.
+
+## Data use and attribution
+
+Obtain CRC100K, MHIST, and PatchCamelyon through the sources listed in the [paper's data-availability statement](https://www.nature.com/articles/s41467-024-51465-9). Dataset terms, model-weight licenses, and service permissions apply independently. Keep sensitive or access-controlled material, credentials, and private outputs out of public repositories.
+
+The [article](https://www.nature.com/articles/s41467-024-51465-9#rightslink) is published under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/), subject to its third-party credit lines. This README provides a newly written study summary and retains the existing repository graphics without modification. The article license does not change the licensing of repository code, third-party implementations, model weights, or datasets.
+
+## Citation
+
+```bibtex
+@article{ferber2024pathologyicl,
+  title   = {In-context learning enables multimodal large language models to classify cancer pathology images},
+  author  = {Ferber, Dyke and W{\"o}lflein, Georg and Wiest, Isabella C. and
+             Ligero, Marta and Sainath, Srividhya and Ghaffari Laleh, Narmin and
+             El Nahhas, Omar S. M. and M{\"u}ller-Franzes, Gustav and
+             J{\"a}ger, Dirk and Truhn, Daniel and Kather, Jakob Nikolas},
+  journal = {Nature Communications},
+  volume  = {15},
+  pages   = {10104},
+  year    = {2024},
+  doi     = {10.1038/s41467-024-51465-9},
+  url     = {https://doi.org/10.1038/s41467-024-51465-9}
+}
+```
