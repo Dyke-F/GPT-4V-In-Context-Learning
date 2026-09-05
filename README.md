@@ -1,17 +1,32 @@
-# In-context learning for cancer pathology
+<a name="in-context-learning-for-cancer-pathology"></a>
 
-**Multimodal language-model evaluation, image-example selection, and matched vision-model baselines.**
+<h1 align="center">🔬 In-context learning for cancer pathology</h1>
 
-Research code accompanying **Ferber et al., Nature Communications 15, 10104 (2024)**:
-[**In-context learning enables multimodal large language models to classify cancer pathology images**](https://doi.org/10.1038/s41467-024-51465-9).
+<p align="center">
+  <strong>Learning from image examples, without updating model weights</strong><br/>
+  Multimodal language-model evaluation, image-example selection, and matched vision-model baselines.
+</p>
 
-[📄 Paper](https://www.nature.com/articles/s41467-024-51465-9) · [Published results](#published-results) · [Getting started](#getting-started) · [Classifier training](#vision-classifier-training) · [Citation](#citation)
-
-This project evaluates how image examples supplied in context change GPT-4V's histopathology classification performance. It compares zero-shot prompting, random few-shot selection, and nearest-neighbour selection in pathology-embedding space, alongside trained image classifiers and pathology foundation-model probes.
+<p align="center">
+  <a href="https://www.nature.com/articles/s41467-024-51465-9">
+    <img src="https://img.shields.io/badge/Nature_Communications-2024-F97316?style=for-the-badge&amp;labelColor=111827" alt="Published in Nature Communications (2024)" width="394"/>
+  </a>
+</p>
 
 ![Overview of the in-context learning and vision-model evaluation workflow](project_layout.png)
 
 *Project schematic from the existing repository. See the [publication](https://www.nature.com/articles/s41467-024-51465-9) for the study figures, methods, and accompanying credits.*
+
+- 📄 **Publication:** [**Nature Communications · 2024**](https://www.nature.com/articles/s41467-024-51465-9)  
+  *In-context learning enables multimodal large language models to classify cancer pathology images*  
+  Ferber et al. · Nature Communications 15, 10104 (2024).
+- 📊 [**Published results**](#published-results)
+- 🗂️ [**Code map**](#code-map)
+- ⚙️ [**Getting started**](#getting-started)
+- 🔬 [**Vision classifier training**](#vision-classifier-training)
+- 📚 [**Citation / BibTeX**](#citation)
+
+This project evaluates how image examples supplied in context change GPT-4V's histopathology classification performance. It compares zero-shot prompting, random few-shot selection, and nearest-neighbour selection in pathology-embedding space, alongside trained image classifiers and pathology foundation-model probes.
 
 <a name="published-results"></a>
 
